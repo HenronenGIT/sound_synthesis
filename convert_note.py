@@ -2,9 +2,10 @@ from dataclasses import asdict
 from tracemalloc import stop
 import pyaudio
 import numpy as np
-import matplotlib.pyplot as plot
-from scipy import signal
+# import matplotlib.pyplot as plot
+# from scipy import signal
 import math
+from scipy.io.wavfile import write
 
 def play_note(note):
     p = pyaudio.PyAudio()
@@ -42,8 +43,11 @@ print(freqs)
 notes = []
 ### Sin waves ####
 for freq in freqs:
+    # note = signal.square(2 * np.pi * freq * duration)
+    # note = note.astype(np.float32)
     note = (np.sin(2 * np.pi * np.arange(sample_rate*duration)*freq/sample_rate)).astype(np.float32)
     notes.append(note)
 
+write('test.wav', 44100, notes)
 for note in notes:
     play_note(note)
