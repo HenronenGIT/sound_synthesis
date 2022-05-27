@@ -1,7 +1,7 @@
-tempo 160
+tempo 120
 tracks triangle,sine
 
-1: | c d e f e d | c/3  g | c/5  r/1 |
+1: | c d e f e d d f r w| c/3  g | c/5  r/1 |
 2: | c2/3  d     | a2   g | c3/5 r/1 |
 
 1: | d r d e r e | f/3  d |
@@ -9,7 +9,3 @@ tracks triangle,sine
 
 1: | c4 d e f e d | c/3  g | c5/6  |
 2: | c2/3   d     | a2   g | c3/6  |
-
-# If missing duration it will be 1 beat
-# = 60 / 160
-# = 0.375

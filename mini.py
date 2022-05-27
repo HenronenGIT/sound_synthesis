@@ -50,18 +50,24 @@ def generate_notes(times, freqs, total_tracks, notes):
 					channels=1,
 					rate=sample_rate,
 					output=True)
+	# for track in freqs:
+	# 	for time in times:
+	# 		for sec in time:
+	# 			for hz in track:
 	while (j < total_tracks):
 		track = []
 		i = 0
 		while i < notes[j]["total"]:
+			# print(freqs[j][i])
+			# print(times[j][i])
 			note = (np.sin(2 * np.pi * np.arange(sample_rate*times[j][i])*freqs[j][i]/sample_rate))
 			track = np.append(track, note)
-			# print (track)
 			i += 1
+		print (track)
 		tracks += [track]
 		j += 1
 	# print (tracks)
-	data = tracks[0].astype(np.float32).tobytes()
+	data = tracks[1].astype(np.float32).tobytes()
 	play_track(data, stream)
 	stream.stop_stream()
 	stream.close()
@@ -120,7 +126,6 @@ def collect_info(f):
 			string = strstr.split(' ')
 			string.pop(0)
 			prev = 60 / tempo
-			print(tempo)
 			prev_octave = 4
 			total_tracks += 1
 			for word in string:
@@ -152,8 +157,8 @@ def collect_info(f):
 						while j < len(word):
 							s += word[j]
 							j += 1
-						digit = float(s) * prev
-						track2[count]["duration"].append(digit)
+						track2[count]["duration"].append(float(s))
+						prev = float(s)
 					j += 1
 			track2[count].update(total=total_count)
 			count += 1
@@ -170,3 +175,6 @@ def main(argv, argc):
 
 if __name__ == "__main__":
 	main(sys.argv, len(sys.argv))
+
+#pg.mixer.quit()
+#pg.quit()
