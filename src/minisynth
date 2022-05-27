@@ -4,12 +4,24 @@ import pyaudio
 import numpy as np
 import json
 #import math
+<<<<<<< HEAD
 #from pyaudio import PyAudio
 from scipy.io.wavfile import write
+=======
+from pyaudio import PyAudio
+import wave, struct, math, random
+
+
+#pg.init()
+#pg.mixer.init()
+#screen = pg.display.set_mode((1280, 720))
+#font = pg.font.SysFont("Impact", 48)
+>>>>>>> 3091add77b2e9508f4e3a0e41f4aa5dc73e182fd
 
 sample_rate = 44100
 
 
+<<<<<<< HEAD
 def play_note(note, p):
 	# p = pyaudio.PyAudio()
 	# volume = 0.5
@@ -18,6 +30,56 @@ def play_note(note, p):
 					rate=sample_rate,
 					output=True)
 	stream.write(note)
+=======
+freqs = []
+freqs2 = []
+p = pyaudio.PyAudio()
+
+# def callback(in_data, frame_count, time_info, flag):
+# 	global b,a,fulldata #global variables for filter coefficients and array
+		
+# 	audio_data = np.fromstring(in_data, dtype=np.int16)
+   
+# 	freqs = audio_data[0::CHANNELS]
+# 	freqs2 = audio_data[1::CHANNELS]
+# 	data1 = freqs.tostring()
+# 	data2 = freqs2.tostring()
+# 	freqs_frames.append(data1)
+# 	freqs2_frames.append(data2)
+# 	wf1 = wave.open('freqs.wav', 'wb')
+# 	wf2 = wave.open('freqs2.wav', 'wb')
+# 	wf1.setnchannels(1)
+# 	wf2.setnchannels(1)
+# 	wf1.setsampwidth(audio.get_sample_size(FORMAT))
+# 	wf2.setsampwidth(audio.get_sample_size(FORMAT))
+# 	wf1.setframerate(RATE)
+# 	wf2.setframerate(RATE)
+# 	wf1.writeframes(b''.join(freqs_frames))
+# 	wf2.writeframes(b''.join(freqs2_frames))
+# 	wf1.close()
+# 	wf2.close()
+		
+# 	return (audio_data, pyaudio.paContinue)
+
+def group(n, items):
+	ns = [iter(items)] * n
+	while True:
+		yield [next(a) for a in ns]
+
+# def play_note(note):
+# 	p = pyaudio.PyAudio()
+# 	volume = 0.5
+# 	stream = p.open(format=pyaudio.paFloat32,
+# 					channels=1,
+# 					rate=sample_rate,
+# 					output=True)
+# 	# play. May repeat with different volume values (if done interactively) 
+# 	stream.write(volume*note)
+# 	stream.stop_stream()
+# 	stream.close()
+# 	# close PyAudio (7)
+# 	p.terminate()
+>>>>>>> 3091add77b2e9508f4e3a0e41f4aa5dc73e182fd
 
 def convert_note_to_hz(char):
 	file = open("notes.txt", 'r')
@@ -30,26 +92,85 @@ def convert_note_to_hz(char):
 	file.close()
 	return (hz)
 
+def callback(in_data, frame_count, time_info, status):
+	data = wf.readframes(frame_count)
+	return (data, pyaudio.paContinue)
+
 def music_create(tracks, total_tracks):
 	duration = []
 	freqs = []
 	i = 0
 	while i < total_tracks:
 		j = 0
+<<<<<<< HEAD
 		while j < tracks[i]["total"]:
+=======
+		while j < tracks[i]["total"] and i == 0:
+			#print(tracks[i]["pitch"][j])
+>>>>>>> 3091add77b2e9508f4e3a0e41f4aa5dc73e182fd
 			hz = convert_note_to_hz(tracks[i]["pitch"][j])
 			freqs.append(hz)
 			time = tracks[i]["duration"][j]
 			duration.append(time)
 			j += 1
+		while j < tracks[i]["total"] and i == 1:
+			#print(tracks[i]["pitch"][j])
+			hz = convert_note_to_hz(tracks[i]["pitch"][j])
+			freqs2.append(hz)
+			time = tracks[i]["duration"][j]
+			duration.append(time)
+			j += 1
 		i += 1
+<<<<<<< HEAD
 	notes = []
 	i = 0
 	for freq in freqs:
 		note = (np.sin(2 * np.pi * np.arange(sample_rate*duration[i])*freq/sample_rate)).astype(np.float32)
+=======
+	#print(duration[0])
+	#print(freqs)
+	notes = []
+	#obj = wave.open('sound.wav', 'w')
+	#obj.setnchannels(1)
+	#obj.setsampwidth(2)
+	#obj.setframerate(sample_rate)
+	#for i in range(99999):
+	#	value = random.randint(-32767, 32767)
+	#data = struct.pack('<h', value)
+	#obj.writeframesraw( data )
+	#obj.close()
+	#notes2 = []
+	
+	i = 0
+	for freq in freqs:
+		#frames = int(duration*sampling_rate)
+		#note = np.cos(2*np.pi*hz*np.linspace(0,duration,frames))
+	
+		note = (np.sin(2 * np.pi * np.arange(sample_rate*duration[i])*freq/sample_rate)).astype(np.float32)
+		#square wave
+		if tracks[0]["tracks"][0] == "square":
+			note = np.clip(10*note, -1, 1)
+
+		#triangular wave
+		elif tracks[0]["tracks"][0] == "triangle":
+			note = np.cumsum(np.clip(note*10, -1, 1))
+			note = note/max(np.abs(note))
+		#print(note)
+		#value = note
+		#data = struct.pack('<h', value)
+		#obj.writeframesraw( data )
+		#stream1.write(note)
+>>>>>>> 3091add77b2e9508f4e3a0e41f4aa5dc73e182fd
 		notes.append(note)
 		i += 1
+	p = pyaudio.PyAudio()
+	volume = 0.5
+	stream = p.open(format=pyaudio.paFloat32,
+					channels=1,
+					rate=sample_rate,
+					output=True)
 
+<<<<<<< HEAD
 	p = pyaudio.PyAudio()
 	for note in notes:
 		play_note(note, p)
@@ -57,6 +178,123 @@ def music_create(tracks, total_tracks):
 	# stream.close()
 	# close PyAudio (7)
 	p.terminate()
+=======
+	for note in notes:
+		stream.write(volume*note)
+		#play_note(note)
+	stream.stop_stream()
+	stream.close()
+	# close PyAudio (7)
+	p.terminate()
+	# i = 0
+	# for freq in freqs2:
+	# 	#frames = int(duration*sampling_rate)
+	# 	#note = np.cos(2*np.pi*hz*np.linspace(0,duration,frames))
+	
+	# 	note2 = (np.sin(2 * np.pi * np.arange(sample_rate*duration[i])*freq/sample_rate)).astype(np.float32)
+	# 	#square wave
+	# 	if tracks[1]["tracks"] == "square":
+	# 		note2 = np.clip(10*note2, -1, 1)
+
+	# 	#triangular wave
+	# 	if tracks[1]["tracks"] == "triangle":
+	# 		note2 = np.cumsum(np.clip(note2*10, -1, 1))
+	# 		note2 = note/max(np.abs(note2))
+		#print(note)
+		#value = note
+		#data = struct.pack('<h', value)
+		#obj.writeframesraw( data )
+		#stream2.write(note2)
+	# 	notes2.append(note2)
+	# 	i += 1
+	# wf = wave.open(notes[0], 'rb')
+	# stream = p.open(format=pyaudio.paFloat32,
+	# 			channels=1,
+	# 			rate=sample_rate,
+	# 			output=True,
+	# 			stream_callback=callback)
+	# stream2 = p.open(format=pyaudio.paFloat32,
+	# 			channels=1,
+	# 			rate=sample_rate,
+	# 			output=True)
+	# stream.start_stream()
+	# while stream.is_active():
+	# 	time.sleep(0.1)
+	# stream.stop_stream()
+	# stream.close()
+	# wf.close()
+	# p.terminate()
+	#obj.close()
+	#stop_note_func(stream1, stream2)
+	#stream.start_stream()
+
+
+	# keylist='123456789qwertyuioasdfghjklzxcvbnm,.'
+	# notes_files = open("noteslist.txt")
+	# file_contents = notes_files.read()
+	# notes_files.close()
+	# file_contents = file_contents.replace(" ", "")
+	# file_contents = file_contents.replace("\n", "")
+	# noteslist = file_contents.split(',')
+	# #print(noteslist)
+	# #print(noteslist)
+	# keymod = '0-='
+	# notes = {}
+	# freq = 16.3516
+	# posx, posy = 25, 25#start position
+	# index = -1
+	# j = 0
+
+	# for i in range(len(noteslist)):
+	# 	mod = int(i/36)
+	# 	key = keylist[i-mod*36]+str(mod)
+	# 	sample = synth(freq)
+	# 	notes[key] = [sample, noteslist[i], freq]
+	# 	notes[key][0].set_volume(0.33)
+	# 	notes[key][0].play()
+	# 	notes[key][0].fadeout(100)
+	# 	#print(notes)
+	# 	#pg.time.wait(100)
+	# 	freq = freq * 2 ** (1/12)
+	# 	#added below to make the keyboard
+	# 	posx = posx + 140
+	# 	if posx > 1220:
+	# 		posx, posy = 25, posy+56
+		
+	# 	pg.display.update()
+
+	# running, mod = 1, 1
+	# keypresses = []
+
+	# while running:
+	# 	for event in pg.event.get():
+	# 		if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
+	# 			running = False
+	# 		if event.type == pg.KEYDOWN:
+	# 			key = str(event.unicode)
+	# 			if key in keymod:
+	# 				mod = keymod.index(str(event.unicode))
+	# 			elif key in keylist:
+	# 				key = key+str(mod)
+	# 				notes[key][0].play()
+	# 				keypresses.append([1, notes[key][1], pg.time.get_ticks()])
+	# 		if event.type == pg.KEYUP and str(event.unicode) != '' and str(event.unicode) in keylist:
+	# 			key = str(event.unicode)+str(mod)
+	# 			notes[key][0].fadeout(100)
+	# 			keypresses.append([0, notes[key][1], pg.time.get_ticks()])
+	
+	# if len(keypresses) > 1:
+	# 	for i in range(len(keypresses)-1):
+	# 		keypresses[-i-1][2] = keypresses[-i-1][2] - keypresses[-i-2][2]
+	# 	keypresses[0][2] = 0#first at zero
+
+	# 	with open("soundsequence.txt.", "w") as file:
+	# 		for i in range(len(keypresses)):
+	# 			file.write(str(keypresses[i])+'\n')#separate lines for readability
+	# 	file.close()
+
+	#print(noteslist)
+>>>>>>> 3091add77b2e9508f4e3a0e41f4aa5dc73e182fd
 
 def collect_info(f):
 	lines = f.readlines()
