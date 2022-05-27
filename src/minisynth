@@ -3,6 +3,60 @@ import sys
 import pyaudio
 import numpy as np
 import json
+#import math
+#from pyaudio import PyAudio
+from scipy.io.wavfile import write
+
+sample_rate = 44100
+
+
+def play_note(note, p):
+	# p = pyaudio.PyAudio()
+	# volume = 0.5
+	stream = p.open(format=pyaudio.paFloat32,
+					channels=1,
+					rate=sample_rate,
+					output=True)
+	stream.write(note)
+
+def convert_note_to_hz(char):
+	file = open("notes.txt", 'r')
+	hz = 0
+	lines = file.readlines()
+	for line in lines:
+		if (char in line):
+			arr = line.split()
+			hz = float(arr[1])
+	file.close()
+	return (hz)
+
+def music_create(tracks, total_tracks):
+	duration = []
+	freqs = []
+	i = 0
+	while i < total_tracks:
+		j = 0
+		while j < tracks[i]["total"]:
+			hz = convert_note_to_hz(tracks[i]["pitch"][j])
+			freqs.append(hz)
+			time = tracks[i]["duration"][j]
+			duration.append(time)
+			j += 1
+		i += 1
+	notes = []
+	i = 0
+	for freq in freqs:
+		note = (np.sin(2 * np.pi * np.arange(sample_rate*duration[i])*freq/sample_rate)).astype(np.float32)
+		notes.append(note)
+		i += 1
+
+	p = pyaudio.PyAudio()
+	for note in notes:
+		play_note(note, p)
+	# stream.stop_stream()
+	# stream.close()
+	# close PyAudio (7)
+	p.terminate()
 
 def collect_info(f):
 	lines = f.readlines()
@@ -11,9 +65,8 @@ def collect_info(f):
 	i = 0
 	count = 0
 	track2 = dict()
+	total_tracks = 0
 	for line in lines:
-		#if (line[0] != '#' or line[0] != '\n'):
-			#print (line, end="") # Remove all new lines
 		if tempo_word in line:
 			for word in line.split():
 				if word.isdigit():
@@ -22,9 +75,10 @@ def collect_info(f):
 			tracks = line.split(' ')[1]
 			tracks = tracks.replace("\n", "")
 			tracks = tracks.split(',')
+		total_count = 0
 		if line[0].isdigit():
 			# dynamicaly creates dictionary to store tracks in
-			track2[count] = {"nbr": 0, "tracks": "", "pitch": [], "alter": [], "octa": [], "duration": []}
+			track2[count] = {"nbr": 0, "tracks": "", "pitch": [], "duration": [], "total": 0}
 			
 			# collecting nbr of track
 			track2[count].update(nbr=int(line.split(':')[0]))
@@ -36,40 +90,33 @@ def collect_info(f):
 			strstr = strstr.replace('|', '')
 			string = strstr.split(' ')
 			string.pop(0)
-			prev = 1
+			prev = 60 / tempo
 			prev_octave = 4
+			total_tracks += 1
 			for word in string:
 				j = 0
 				octave_found = 0
 				alter_found = 0
+				stage = 0
 				while j < len(word):
+					if j == 0:
+						total_count += 1
 					# collecting pitch
-					if word[j] >= 'a' and word[j] <= 'g' and j == 0:
-						track2[count]["pitch"].append(word[0])
-					elif word[j] == 'r' and j == 0:
-						track2[count]["pitch"].append(word[0])
-					elif word[j] < 'a' and word[j] > 'g' and word[j] != 'r' and j == 0:
-						track2[count]["pitch"].append("N")
+					s = ''
+					while j < len(word) and word[j] != '/':
+						if j == 0:
+							s += word[j].upper()
+						else:
+							s += word[j]
+						j += 1
+					if (len(s) == 1):
+						s += '0'
+					track2[count]["pitch"].append(s)
 					
-					# collecting alteration
-					if word[j] == '#' and j == 1:
-						track2[count]["alter"].append("#")
-						alter_found = 1
-					elif word[j] == 'b' and j == 1:
-						track2[count]["alter"].append("b")
-						alter_found = 1
-					elif word[j] != '#' and word[j] != 'b' and j == 1:
-						track2[count]["alter"].append("N")
-						alter_found = 1
-
-					# collecting octave
-					if word[j] >= '0' and word[j] <= '9':
-						track2[count]["octa"].append(int(word[j]))
-						prev_octave = int(word[j])
-						octave_found = 1
-
 					# collecting duration
-					if word[j] == '/':
+					if j == len(word):
+						track2[count]["duration"].append(prev)
+					elif word[j] == '/':
 						s = ''
 						j += 1
 						while j < len(word):
@@ -77,22 +124,12 @@ def collect_info(f):
 							j += 1
 						track2[count]["duration"].append(float(s))
 						prev = float(s)
-						if octave_found == 0:
-							track2[count]["octa"].append(prev_octave)
-						if alter_found == 0:
-							track2[count]["alter"].append("N")
-					elif j == len(word) - 1:
-						track2[count]["duration"].append(prev)
-						if octave_found == 0:
-							track2[count]["octa"].append(prev_octave)
-						if alter_found == 0:
-							track2[count]["alter"].append("N")
 					j += 1
+			track2[count].update(total=total_count)
 			count += 1
-			print(json.dumps(track2, sort_keys=False, indent=1))
 		i += 1
-	
-	print(tempo)
+	# print(json.dumps(track2, sort_keys=False, indent=1))
+	music_create(track2, total_tracks)
 
 def main(argv, argc):
 	if argc == 2:
@@ -103,3 +140,6 @@ def main(argv, argc):
 
 if __name__ == "__main__":
 	main(sys.argv, len(sys.argv))
+
+#pg.mixer.quit()
+#pg.quit()
